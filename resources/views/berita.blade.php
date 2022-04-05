@@ -1,0 +1,88 @@
+@extends('layouts.main')
+@section('container')
+<h1 class="mb-3 text-center">{{ $title }}</h1>
+
+<div class="row justify-content-center mb-3">
+  <div class="col-md-6">
+    <form action="/berita">
+      @if (request('category'))
+      <input type="hidden" name="category" value="{{ request('category') }}">
+      @endif
+
+      @if (request('author'))
+      <input type="hidden" name="author" value="{{ request('author') }}">
+      @endif
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Search" name="search" value="{{ request('search') }}">
+        <button class="btn btn-danger" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+@if ($berita->count())
+<div class="card mb-3">
+  @if ($berita[0]->image)
+  <div style="max-height: 350px; overflow:hidden;">
+    <img src="{{ asset('storage/'. $berita[0]->image) }}" alt="{{ $berita[0]->category->name }}" class="img-fluid">
+  </div>
+  @else
+  <img src="https://source.unsplash.com/1200x400?{{ $berita[0]->category->name }}" class="card-img-top"
+    alt="{{ $berita[0]->category->name }}">
+  @endif
+  <div class="card-body text-center">
+    <h3 class="card-title"><a href="/berita/{{ $berita[0]->slug }}" class="text-decoration-none text-dark">{{
+        $berita[0]->title }}</a></h3>
+    <p>
+      <small class="text-muted">
+        Oleh : <a href="/berita?author={{ $berita[0]->author->username }}" class="text-decoration-none">{{
+          $berita[0]->author->name }}</a> <br> Kategori : <a href="/berita?category={{ $berita[0]->category->slug }}"
+          class="text-decoration-none">{{ $berita[0]->category->name }}</a> {{ $berita[0]->created_at->diffForHumans()
+        }}
+      </small>
+    </p>
+    <p class="card-text">{{ $berita[0]->excerpt }}</p>
+    <a href="/berita/{{ $berita[0]->slug }}" class="text-decoration-none btn btn-primary">Read More</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    @foreach ($berita->skip(1) as $posts )
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <div class="position-absolute px-3 py-2" style="background-color: rgba(0, 0, 0, 0.7)"><a
+            href="/berita?category={{ $posts->category->slug }}" class="text-decoration-none text-white">{{
+            $posts->category->name }}</a></div>
+        @if ($posts->image)
+        <img src="{{ asset('storage/'. $posts->image) }}" alt="{{ $posts->category->name }}" class="img-fluid">
+        @else
+        <img src="https://source.unsplash.com/500x400?{{ $posts->category->name }}" class="card-img-top"
+          alt="{{ $posts->category->name }}">
+        @endif
+        <div class="card-body">
+          <h5 class="card-title">{{ $posts->title }}</h5>
+          <p>
+            <small class="text-muted">
+              Oleh : <a href="/berita?author={{ $posts->author->username }}" class="text-decoration-none">{{
+                $posts->author->name }}</a> {{ $posts->created_at->diffForHumans() }}
+            </small>
+          </p>
+          <p class="card-text">{{ $posts->excerpt }}</p>
+          <a href="/berita/{{ $posts->slug }}" class="btn btn-primary">Read More</a>
+        </div>
+      </div>
+    </div>
+    @endforeach
+  </div>
+</div>
+
+@else
+<p class="text-center fs-4">No post found.</p>
+@endif
+
+<div class="d-flex justify-content-end">
+  {{ $berita->links() }}
+</div>
+@endsection
